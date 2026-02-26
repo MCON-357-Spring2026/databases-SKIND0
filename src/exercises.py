@@ -19,6 +19,8 @@ import sqlite3
 from pathlib import Path
 from typing import Optional, Iterable
 
+import cursor
+
 DB_PATH = Path("../exercises.db")
 
 
@@ -75,8 +77,8 @@ def add_student(conn: sqlite3.Connection, name: str, email: str) -> int:
     """
     # cursor = conn.execute("INSERT ...", (...))
     # return cursor.lastrowid
-    raise NotImplementedError
-
+    cursor = conn.execute("INSERT INTO students (name, email) VALUES(?, ?);", (name, email))
+    return cursor.lastrowid
 
 # ---------------------------
 # TODO 2: SELECT (one row)
@@ -89,7 +91,7 @@ def find_student_by_email(conn: sqlite3.Connection, email: str) -> Optional[sqli
       - Use a parameterized SELECT
       - Use fetchone()
     """
-    raise NotImplementedError
+    return conn.execute("SELECT * FROM students WHERE email = ?;", (email,)).fetchone()
 
 
 # ---------------------------
@@ -103,20 +105,21 @@ def rename_student(conn: sqlite3.Connection, student_id: int, new_name: str) -> 
       - Use parameterized UPDATE
       - Return cursor.rowcount
     """
-    raise NotImplementedError
+    cursor = conn.execute("UPDATE students SET name = ? WHERE id = ?;", (new_name, student_id, ))
+    return cursor.rowcount
 
 
 # ---------------------------
 # TODO 4: DELETE
 # ---------------------------
-def delete_student(conn: sqlite3.Connection, student_id: int) -> int:
+def delete_student(conn: sqlite3.Connection, students_id: int) -> int:
     """
     Delete a student by id. Return number of rows deleted.
 
     TODO:
       - Use parameterized DELETE
     """
-    raise NotImplementedError
+    conn.execute("DELETE FROM students WHERE id = ?;", (student_id,))
 
 
 # ---------------------------
