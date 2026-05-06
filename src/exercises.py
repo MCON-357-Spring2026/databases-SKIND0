@@ -119,7 +119,8 @@ def delete_student(conn: sqlite3.Connection, students_id: int) -> int:
     TODO:
       - Use parameterized DELETE
     """
-    conn.execute("DELETE FROM students WHERE id = ?;", (student_id,))
+    cursor = conn.execute("DELETE FROM students WHERE id = ?;", (students_id,))
+    return cursor.rowcount
 
 
 # ---------------------------
@@ -133,7 +134,14 @@ def list_enrollments(conn: sqlite3.Connection) -> list[sqlite3.Row]:
       - Write a SELECT with JOIN across enrollments, students, courses
       - ORDER BY student_name, course_code
     """
-    raise NotImplementedError
+    return conn.execute("""
+                        SELECT s.name AS student_name, c.code AS course_code, c.title AS course_title
+                        FROM enrollments e
+                                 JOIN students s ON e.student_id = s.id
+                                 JOIN courses c ON e.course_id = c.id
+                        ORDER BY s.name, c.code;
+                        """).fetchall()
+
 
 
 # ---------------------------
@@ -147,7 +155,10 @@ def enroll_student(conn: sqlite3.Connection, student_id: int, course_id: int) ->
       - Use parameterized INSERT into enrollments
       - Do NOT commit here; caller controls commit/rollback.
     """
-    raise NotImplementedError
+    conn.execute(
+        "INSERT INTO enrollments (student_id, course_id) VALUES (?, ?);",
+        (student_id, course_id)
+    )
 
 
 def seed_courses(conn: sqlite3.Connection) -> None:
@@ -199,7 +210,7 @@ def main() -> None:
         #   - the second insert raises IntegrityError
         #   - we rollback
         #   - no enrollments are saved for that transaction block
-        course_cs205 = conn.execute("SELECT id FROM courses WHERE code = ?;", ("CS205",)).fetchone()["id"]
+
 
         try:
             conn.execute("BEGIN;")
