@@ -19,8 +19,6 @@ import sqlite3
 from pathlib import Path
 from typing import Optional, Iterable
 
-import cursor
-
 DB_PATH = Path("../exercises.db")
 
 
